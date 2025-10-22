@@ -8,7 +8,7 @@ def make_background():
     sand_tile_location = 'assets/bg/tile_0055.png'
     sand_tile = pygame.image.load(sand_tile_location)
     
-    cactus_tile_location = 'assets\bg\tile_0063.png'
+    cactus_tile_location = 'assets/bg/tile_0063.png'
     cactus_tile = pygame.image.load(cactus_tile_location)
 
     # I am getting the width and height for the tile
@@ -24,7 +24,13 @@ def make_background():
             background.blit(sand_tile, (x,y))
 
     # make the cactus tile, put 20 at random tiles
-
+    num_cactus = 20
+    for i in range(num_cactus):
+        x = randint(0,WIDTH)
+        y = randint(0,HEIGHT)
+        
+        #blit them cactus
+        background.blit(cactus_tile,(x,y))
     
     # return the background
     return background
