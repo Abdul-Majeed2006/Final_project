@@ -13,9 +13,14 @@ class Player(pygame.sprite.Sprite):
         #make my player tile and get player rect
         self.image = pygame.image.load('assets/players/tile_0005.png')
         self.rect = self.image.get_rect()
+        
+        
+        
+
 
         # increase player size
         self.image = pygame.transform.rotozoom(self.image,0,5)
+
 
 
     
@@ -24,6 +29,23 @@ class Player(pygame.sprite.Sprite):
         self.x += self.vx
         self.y += self.vy
         self.rect.center = (self.x,self.y)
+        #player should not leave screen
+        # max height the player can reach on the screen so he doesnt go out of screen
+        h = self.image.get_height()
+        height = HEIGHT- h
+        w = self.image.get_width()
+        width = WIDTH - w
+        if self.x < 0:
+            self.x = 0
+        if self.x > width:
+            self.x = width
+        if self.y < 0:
+            self.y = 0
+        # height - height of image
+        if self.y > height:
+            self.y = height
+        
+        
         
 
     # we would make our player using arrows, N//B: clicking a key is an event
