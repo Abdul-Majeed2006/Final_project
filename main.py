@@ -29,9 +29,14 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        # event
+        player.check_event(event)
 
-    
-    
+    # update our player
+    player.update()
+
+
+    #draw background
     screen.blit(background,(0,0))
     
 
