@@ -1,6 +1,7 @@
 import pygame
 from util_background import *
 from util_params import *
+from util_player import *
 
 # pygame setup
 pygame.init()
@@ -12,6 +13,9 @@ running = True
 
 # make background by calling the make background function
 background = make_background()
+
+# make a player
+player = Player()
 
 ########### TESTING ZONE #################
 
@@ -29,8 +33,11 @@ while running:
     
     
     screen.blit(background,(0,0))
+    
 
-    # RENDER YOUR GAME HERE
+
+    # RENDER YOUR GAME HERE((
+    player.draw(screen)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
