@@ -1,6 +1,7 @@
 import pygame
 from util_params import *
 import math
+from util_sight import *
 
 class Weapon(pygame.sprite.Sprite):
     def __init__(self,player):
@@ -22,6 +23,9 @@ class Weapon(pygame.sprite.Sprite):
         # position of gun is gonna be position of player
         self.rect = self.image.get_rect()
         self.rect.center = self.player.rect.center
+        # sight
+        aim = self.current_weapon['aim']
+        self.sight = Sight(aim)
        
 
     def update(self):
@@ -38,6 +42,8 @@ class Weapon(pygame.sprite.Sprite):
         self.image = pygame.transform.rotozoom(self.image,-angle,1)
         #the weapons position shoiuld  be thesame with the players position
         self.rect = self.image.get_rect(center = self.player.rect.center)
+        #update sight
+        self.sight.update()
 
     def shoot(self):
         #player calls funnction by clicking on mouse
@@ -54,3 +60,5 @@ class Weapon(pygame.sprite.Sprite):
 
     def draw(self,screen):
         screen.blit(self.image, self.rect)
+        #draw the sight
+        self.sight.draw(screen)

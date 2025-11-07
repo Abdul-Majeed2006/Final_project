@@ -4,24 +4,21 @@ from util_params import *
 from util_player import *
 from util_enemy import *
 from util_weapons import *
+from util_sight import *
 
 # pygame setup
 pygame.init()
+pygame.mouse.set_visible(False)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 running = True
 
-
-
 # make background by calling the make background function
 background = make_background()
 
-# make a player weapon and enemy
+# make a player weapon and enemy and sight
 player = Player()
 enemy_group = pygame.sprite.Group()
-#weapon = Weapon(player, enemy_group)
-
-
 
 # make 10
 for i in range(10):
@@ -30,8 +27,6 @@ for i in range(10):
     enemy_group.add(Enemy(x_pos,y_pos,player))
 
 ########### TESTING ZONE #################
-
-
 
 ##########################################
 
@@ -46,18 +41,13 @@ while running:
 
     # update our player
     player.update()
-    #weapon.update()
     enemy_group.update()
-
 
     #draw background
     screen.blit(background,(0,0))
     
-
-
     # RENDER YOUR GAME HERE((
     player.draw(screen)
-    #weapon.draw(screen)
     enemy_group.draw(screen)
 
     # flip() the display to put your work on screen
