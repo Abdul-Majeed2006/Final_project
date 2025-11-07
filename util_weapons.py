@@ -17,9 +17,10 @@ class Weapon(pygame.sprite.Sprite):
         self.max_ammo = 30
         #load rifle image
         rifle = self.current_weapon['rifle']
-        self.image = pygame.image.load(rifle)
-        self.image = pygame.transform.rotozoom(self.image,0,2)
-        self.rect = self.image.get_rect()
+        original_image = pygame.image.load(rifle)
+        # save clean copy of image so it doesnt keep blurring out
+        self.original_image = pygame.transform.rotozoom(original_image,0,2)
+        self.image = self.original_image.copy()
         # position of gun is gonna be position of player
         self.rect = self.image.get_rect()
         self.rect.center = self.player.rect.center
@@ -40,7 +41,7 @@ class Weapon(pygame.sprite.Sprite):
         self.angle = math.atan2(delta_y,delta_x)
         angle_degrees = math.degrees(self.angle)
         #well roate the gun with the cursor so it points at what its aiming
-        self.image = pygame.transform.rotozoom(self.image,-self.angle,1)
+        self.image = pygame.transform.rotozoom(self.original_image,-angle_degrees,1)
         #the weapons position shoiuld  be thesame with the players position
         self.rect = self.image.get_rect(center = self.player.rect.center)
         #update sight
