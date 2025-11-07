@@ -17,9 +17,13 @@ class Weapon(pygame.sprite.Sprite):
         self.max_ammo = 30
         #load rifle image
         rifle = self.current_weapon['rifle']
-        original_image = pygame.image.load(rifle)
         # save clean copy of image so it doesnt keep blurring out
+        original_image = pygame.image.load(rifle)
+        # have a normal and a flipped version of image
         self.original_image = pygame.transform.rotozoom(original_image,0,2)
+        #flipped
+        self.original_image_flipped = pygame.transform.flip(self.original_image,0,1)
+        #n//b the imgae thats is gonna be drawn is self.image
         self.image = self.original_image.copy()
         # position of gun is gonna be position of player
         self.rect = self.image.get_rect()
@@ -29,6 +33,8 @@ class Weapon(pygame.sprite.Sprite):
         self.sight = Sight(aim)
         #create bullet group for the rifle
         self.bullet_group = pygame.sprite.Group()
+        #angle of rotation
+        self.angle = 0
        
     def update(self):
         # well use cursor to aim 
@@ -40,8 +46,14 @@ class Weapon(pygame.sprite.Sprite):
         #calculate the angle, convert to degrees, pygame accept degrees only
         self.angle = math.atan2(delta_y,delta_x)
         angle_degrees = math.degrees(self.angle)
-        #well roate the gun with the cursor so it points at what its aiming
-        self.image = pygame.transform.rotozoom(self.original_image,-angle_degrees,1)
+        # flip gun wto the right or left
+        if abs(angle_degrees) > 90:
+            image = self.original_image_flipped
+        else:
+            image = self.original_image
+        # rotate the image
+        self.image = pygame.transform.rotozoom(image, -angle_degrees,1)
+
         #the weapons position shoiuld  be thesame with the players position
         self.rect = self.image.get_rect(center = self.player.rect.center)
         #update sight
