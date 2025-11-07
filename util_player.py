@@ -11,7 +11,14 @@ class Player(pygame.sprite.Sprite):
         self.vy = 0    
         #make my player tile and get player rect
         self.image = pygame.image.load('assets/players/tile_0006.png')
-        self.image = pygame.transform.rotozoom(self.image,0,2)
+        # make a left and a right facing image
+        image_right = pygame.transform.rotozoom(self.image,0,2)
+        self.image_right = image_right
+        self.image_left = pygame.transform.flip(image_right,1,0)
+        #the first drawn image is looh_righ
+        self.image = self.image_right
+
+        
         self.rect = self.image.get_rect()
         self.rect.center = (self.x,self.y)
         # create weapon inside player, weapon part of player
@@ -22,6 +29,13 @@ class Player(pygame.sprite.Sprite):
         self.x += self.vx
         self.y += self.vy
         self.rect.center = (self.x,self.y)
+        # update player to look  at left when moving left
+        # moving  right
+        if self.vx > 0:
+            self.image = self.image_right
+        # moving left
+        if self.vx < 0:
+            self.image = self.image_left
         #player should not leave screen
         # max height the player can reach on the screen so he doesnt go out of screen
         h = self.image.get_height()
