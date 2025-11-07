@@ -19,7 +19,7 @@ background = make_background()
 # make a player weapon and enemy
 player = Player()
 enemy_group = pygame.sprite.Group()
-weapon = Weapon(player, enemy_group)
+#weapon = Weapon(player, enemy_group)
 
 
 
@@ -46,7 +46,7 @@ while running:
 
     # update our player
     player.update()
-    weapon.update()
+    #weapon.update()
     enemy_group.update()
 
 
@@ -57,12 +57,12 @@ while running:
 
     # RENDER YOUR GAME HERE((
     player.draw(screen)
-    weapon.draw(screen)
+    #weapon.draw(screen)
     enemy_group.draw(screen)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
 
-    clock.tick(60)  # limits FPS to 60
+    clock.tick(10)  # limits FPS to 60
 
 pygame.quit()

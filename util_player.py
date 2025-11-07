@@ -1,25 +1,23 @@
 import pygame
 from util_params import *
+from util_weapons import *
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self,x = HEIGHT, y= WIDTH , shells = 30):
+    def __init__(self,x = HEIGHT/2, y= WIDTH/2):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
         self.vx = 0
         self.vy = 0
-        self.shells = shells
+       
         #make my player tile and get player rect
         self.image = pygame.image.load('assets/players/tile_0006.png')
-        self.rect = self.image.get_rect()
-        
-        
-        
-
-
-        # increase player size
         self.image = pygame.transform.rotozoom(self.image,0,2)
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.x,self.y)
 
+        # create weapon inside player, weapon part of player
+        self.weapon = Weapon(self)
 
 
     
@@ -43,6 +41,9 @@ class Player(pygame.sprite.Sprite):
         # height - height of image
         if self.y > height:
             self.y = height
+        
+        # call weapon update to update with player
+        self.weapon.update()
 
         
         
@@ -63,25 +64,34 @@ class Player(pygame.sprite.Sprite):
             # right arrow move right
             if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                 self.vx += 2 
-       
+            # we need to reload
+            if event.key == pygame.K_r:
+                self.reload()
+
+        #check for mouse click
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            #left mouse click
+            self.shoot()
+
+        
 
 
 
 
 
     def shoot(self):
-        # when a key is pressed
-        
-        self.shells -= 1
+        self.weapon.shoot()
 
        
     def reload(self):
-        #if a key is clicked reload
+        self.weapon.reload()
+         
 
-        shells = 30
-    
+        
     def draw(self,screen):
+        #draw player then image
         screen.blit(self.image, self.rect)
+        self.weapon.draw(screen)
         # update the scores
         score = 0
         score_string = f'{score}'
