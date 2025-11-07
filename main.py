@@ -2,6 +2,7 @@ import pygame
 from util_background import *
 from util_params import *
 from util_player import *
+from util_enemy import *
 
 # pygame setup
 pygame.init()
@@ -16,6 +17,15 @@ background = make_background()
 
 # make a player
 player = Player()
+
+#make enemy 
+enemy_group = pygame.sprite.Group()
+
+# make 10
+for i in range(10):
+    x_pos = randint(0,WIDTH)
+    y_pos = randint(0, HEIGHT)
+    enemy_group.add(Enemy(x_pos,y_pos,player))
 
 ########### TESTING ZONE #################
 
@@ -34,6 +44,7 @@ while running:
 
     # update our player
     player.update()
+    enemy_group.update()
 
 
     #draw background
@@ -43,6 +54,7 @@ while running:
 
     # RENDER YOUR GAME HERE((
     player.draw(screen)
+    enemy_group.draw(screen)
 
     # flip() the display to put your work on screen
     pygame.display.flip()

@@ -18,7 +18,7 @@ class Player(pygame.sprite.Sprite):
 
 
         # increase player size
-        self.image = pygame.transform.rotozoom(self.image,0,5)
+        self.image = pygame.transform.rotozoom(self.image,0,2)
 
 
 
@@ -52,16 +52,16 @@ class Player(pygame.sprite.Sprite):
         if event.type == pygame.KEYDOWN:
         # if a key is being clicked down
             # up arrow move up
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_UP or event.key == pygame.K_w:
                 self.vy += -2 
             #down arrow move down
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 self.vy += 2 
             #left arrow move left
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_a :
                 self.vx += -2 
             # right arrow move right
-            if event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                 self.vx += 2 
        
 
