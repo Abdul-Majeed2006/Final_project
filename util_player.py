@@ -8,19 +8,15 @@ class Player(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.vx = 0
-        self.vy = 0
-       
+        self.vy = 0    
         #make my player tile and get player rect
         self.image = pygame.image.load('assets/players/tile_0006.png')
         self.image = pygame.transform.rotozoom(self.image,0,2)
         self.rect = self.image.get_rect()
         self.rect.center = (self.x,self.y)
-
         # create weapon inside player, weapon part of player
         self.weapon = Weapon(self)
 
-
-    
     def update(self):
         # update player position
         self.x += self.vx
@@ -44,9 +40,6 @@ class Player(pygame.sprite.Sprite):
         
         # call weapon update to update with player
         self.weapon.update()
-
-        
-        
 
     # we would make our player using arrows, N//B: clicking a key is an event
     def check_event(self,event):
@@ -73,21 +66,12 @@ class Player(pygame.sprite.Sprite):
             #left mouse click
             self.shoot()
 
-        
-
-
-
-
-
     def shoot(self):
         self.weapon.shoot()
-
-       
+   
     def reload(self):
         self.weapon.reload()
-         
-
-        
+   
     def draw(self,screen):
         #draw player then image
         screen.blit(self.image, self.rect)
