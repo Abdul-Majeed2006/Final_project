@@ -9,9 +9,8 @@ class Player(pygame.sprite.Sprite):
         self.vx = 0
         self.vy = 0
         self.shells = shells
-        
         #make my player tile and get player rect
-        self.image = pygame.image.load('assets/players/tile_0005.png')
+        self.image = pygame.image.load('assets/players/tile_0006.png')
         self.rect = self.image.get_rect()
         
         
@@ -44,7 +43,7 @@ class Player(pygame.sprite.Sprite):
         # height - height of image
         if self.y > height:
             self.y = height
-        
+
         
         
 
@@ -83,3 +82,10 @@ class Player(pygame.sprite.Sprite):
     
     def draw(self,screen):
         screen.blit(self.image, self.rect)
+        # update the scores
+        score = 0
+        score_string = f'{score}'
+        #get font
+        font = pygame.font.SysFont('Arial',48)
+        score_ = font.render(score_string, True,(255,0,0))
+        screen.blit(score_,(0,0))
