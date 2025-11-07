@@ -2,7 +2,7 @@ import pygame
 from util_params import *
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self,x = HEIGHT/2, y= WIDTH/2 , shells = 30):
+    def __init__(self,x = HEIGHT, y= WIDTH , shells = 30):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
@@ -72,7 +72,7 @@ class Player(pygame.sprite.Sprite):
     def shoot(self):
         # when a key is pressed
         
-        shells -= 1
+        self.shells -= 1
 
        
     def reload(self):

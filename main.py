@@ -3,6 +3,7 @@ from util_background import *
 from util_params import *
 from util_player import *
 from util_enemy import *
+from util_weapons import *
 
 # pygame setup
 pygame.init()
@@ -15,11 +16,12 @@ running = True
 # make background by calling the make background function
 background = make_background()
 
-# make a player
+# make a player weapon and enemy
 player = Player()
-
-#make enemy 
 enemy_group = pygame.sprite.Group()
+weapon = Weapon(player, enemy_group)
+
+
 
 # make 10
 for i in range(10):
@@ -44,6 +46,7 @@ while running:
 
     # update our player
     player.update()
+    weapon.update()
     enemy_group.update()
 
 
@@ -54,6 +57,7 @@ while running:
 
     # RENDER YOUR GAME HERE((
     player.draw(screen)
+    weapon.draw(screen)
     enemy_group.draw(screen)
 
     # flip() the display to put your work on screen
