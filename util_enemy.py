@@ -11,7 +11,8 @@ class Enemy(pygame.sprite.Sprite):
         self.live = 1
         self.x = x
         self.y = y
-        self.damage = 10
+        # enemy health
+        self.health = 10
         self.enemy = ['assets/players/tile_0013.png',
                  'assets/players/tile_0010.png',
                  ]
@@ -45,6 +46,12 @@ class Enemy(pygame.sprite.Sprite):
         self.y += self.vy
         #update rect
         self.rect.center = (self.x,self.y)
+
+    def take_damage(self,amount):
+        self.health -= amount
+        print(f'enmy hit health {self.health}')
+        if self.health <= 0:
+            self.kill()
         
     def draw(self,screen):
         screen.blit(self.image, self.rect)

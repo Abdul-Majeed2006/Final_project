@@ -66,7 +66,9 @@ class Weapon(pygame.sprite.Sprite):
         if self.ammo > 0 :
             self.ammo -= 1
             print(f'{self.ammo}/{self.max_ammo}')
-            new_bullet = Bullet(self.rect.centerx, self.rect.centery, self.angle)
+            #get damage from the bullet class
+            damage = self.current_weapon['damage']
+            new_bullet = Bullet(self.rect.centerx, self.rect.centery, self.angle,damage)
             self.bullet_group.add(new_bullet)
         else:
             print('reload')

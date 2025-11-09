@@ -1,16 +1,19 @@
 import pygame
 import math
 from util_params import *
+#bullet image 
 bullet = pygame.image.load('assets/weapons/tile_0023.png')
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, angle_rads):
+    def __init__(self, x, y, angle_rads,damage):
         pygame.sprite.Sprite.__init__(self)
         self.image = bullet
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
         self.rect.center = (self.x, self.y)
+        #save the damage
+        self.damage = damage
         # set speed of buller
         speed = 15
         # get vx and vy from angle of weapon to aim
