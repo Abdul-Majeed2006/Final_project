@@ -5,6 +5,7 @@ from util_player import *
 from util_enemy import *
 from util_weapons import *
 from util_sight import *
+from random import randint
 
 # pygame setup
 pygame.init()
