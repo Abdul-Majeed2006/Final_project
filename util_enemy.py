@@ -20,11 +20,13 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.image.load(self.fp)
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
+        # explode and does damage to the player
+        self.damage = 10
 
         #speed
         self.vx = randint(-2,2)
         self.vy = randint(-2,2)
-        self.speed = randint(1,3)
+        self.speed = randint(1,2)
         # angle to player 
         self.theta = 0 
 
@@ -46,6 +48,7 @@ class Enemy(pygame.sprite.Sprite):
         self.y += self.vy
         #update rect
         self.rect.center = (self.x,self.y)
+        # if enemy rect = player rect en
 
     def take_damage(self,amount):
         self.health -= amount

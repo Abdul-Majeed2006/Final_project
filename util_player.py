@@ -85,15 +85,16 @@ class Player(pygame.sprite.Sprite):
    
     def reload(self):
         self.weapon.reload()
+
+    def take_damage(self, amount):
+        self.health = 50
+        self.health -= amount
+        if self.health <= 0:
+            self.kill()
+    
+        
    
     def draw(self,screen):
         #draw player then image
         screen.blit(self.image, self.rect)
         self.weapon.draw(screen)
-        # update the scores
-        score = 0
-        score_string = f'{score}'
-        #get font
-        font = pygame.font.SysFont('Arial',48)
-        score_ = font.render(score_string, True,(255,0,0))
-        screen.blit(score_,(0,0))

@@ -5,7 +5,7 @@ from util_params import *
 bullet = pygame.image.load('assets/weapons/tile_0023.png')
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, angle_rads,damage):
+    def __init__(self, x, y, angle_rads,damage=5):
         pygame.sprite.Sprite.__init__(self)
         self.image = bullet
         self.rect = self.image.get_rect()
