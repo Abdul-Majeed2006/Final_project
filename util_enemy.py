@@ -52,7 +52,6 @@ class Enemy(pygame.sprite.Sprite):
 
     def take_damage(self,amount):
         self.health -= amount
-        print(f'enmy hit health {self.health}')
         if self.health <= 0:
             self.kill()
         

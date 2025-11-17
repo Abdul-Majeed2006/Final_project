@@ -7,6 +7,15 @@ from util_weapons import *
 from util_sight import *
 from random import randint
 
+x=20
+# reset game
+def reset_game(player, enemy_group):
+    player.reset()
+    #create new enemies
+    for i in range(x):
+        x_pos = randint(0,WIDTH)
+        y_pos = randint(0,HEIGHT)
+        enemy_group.add(Enemy(x_pos,y_pos,player))
 # pygame setup
 pygame.init()
 pygame.mouse.set_visible(False)
@@ -19,7 +28,7 @@ background = make_background()
 player = Player()
 enemy_group = pygame.sprite.Group()
 # make 10
-for i in range(10):
+for i in range(x):
     x_pos = randint(0,WIDTH)
     y_pos = randint(0, HEIGHT)
     enemy_group.add(Enemy(x_pos,y_pos,player))
@@ -63,6 +72,10 @@ while running:
     score_string = f'{score}'
     score_surface = font.render(score_string, True, (255,0,0))
     screen.blit(score_surface,(0,0))
+    # kill player when health = 0
+    if player.health <= 0:
+        player.kill()
+        running=False
     # flip() the display to put your work on screen
     pygame.display.flip()
     clock.tick(60)  # limits FPS to 60

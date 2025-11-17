@@ -5,20 +5,25 @@ from util_weapons import *
 class Player(pygame.sprite.Sprite):
     def __init__(self,x = HEIGHT/2, y= WIDTH/2):
         pygame.sprite.Sprite.__init__(self)
-        self.x = x
-        self.y = y
+        self.x_o = x
+        self.y_o = y
         self.vx = 0
         self.vy = 0    
-        #make my player tile and get player rect
+        # health
+        self.max_health = 100
+        self.health = 100
+        #alive to return true 
+        self.alive = True
+        #make my player tile and get player rect and  player image after death
         self.image = pygame.image.load('assets/players/tile_0006.png')
-        # make a left and a right facing image
+        self.grave_stone = pygame.image.load('assets/players/gravestone-roof.png')
+        # make a left and a right facing image adjuat size of grave stone
         image_right = pygame.transform.rotozoom(self.image,0,2)
         self.image_right = image_right
         self.image_left = pygame.transform.flip(image_right,1,0)
+        self.grave_stone = pygame.transform.rotozoom(self.grave_stone,0,2)
         #the first drawn image is looh_righ
         self.image = self.image_right
-
-        
         self.rect = self.image.get_rect()
         self.rect.center = (self.x,self.y)
         # create weapon inside player, weapon part of player
@@ -38,10 +43,8 @@ class Player(pygame.sprite.Sprite):
             self.image = self.image_left
         #player should not leave screen
         # max height the player can reach on the screen so he doesnt go out of screen
-        h = self.image.get_height()
-        height = HEIGHT- h
-        w = self.image.get_width()
-        width = WIDTH - w
+        height = HEIGHT
+        width = WIDTH 
         if self.x < 0:
             self.x = 0
         if self.x > width:
@@ -74,6 +77,12 @@ class Player(pygame.sprite.Sprite):
             # we need to reload
             if event.key == pygame.K_r:
                 self.reload()
+        # stop speed when key up
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP or event.key == pygame.K_w or event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                self.vy = 0
+            if event.key == pygame.K_LEFT or event.key == pygame.K_a or event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                self.vx =0
 
         #check for mouse click
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -87,13 +96,25 @@ class Player(pygame.sprite.Sprite):
         self.weapon.reload()
 
     def take_damage(self, amount):
-        self.health = 50
         self.health -= amount
         if self.health <= 0:
-            self.kill()
+            self.die()
     
+    def die(self):
+        self.image = self.grave_stone
+        self.vx = 0
+        self.vy = 0
         
-   
+    def reset(self):
+        self.health = self.max_health
+        self.image = self.image
+        self.x = self.x_o
+        self.y = self.y_o
+        self.rect = self.image.get_rect(self.x,self.y)
+        self.vx = 0
+        self.vy = 0
+        self.weapon.reload()
+
     def draw(self,screen):
         #draw player then image
         screen.blit(self.image, self.rect)
