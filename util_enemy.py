@@ -5,7 +5,7 @@ import math
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, player):
+    def __init__(self, x, y, player,wave_number):
         pygame.sprite.Sprite.__init__(self)
         self.player = player
         self.live = 1
@@ -23,10 +23,14 @@ class Enemy(pygame.sprite.Sprite):
         # explode and does damage to the player
         self.damage = 10
 
+        #speed calculation
+        base_speed = 0.7
+        wave_bonus = (wave_number-1) * 0.3 # wave 1 has no bonus
+        random_bonus = randint(0,3) * 0.1
+        self.speed = base_speed + wave_bonus + random_bonus
         #speed
         self.vx = randint(-2,2)
         self.vy = randint(-2,2)
-        self.speed = randint(1,2)
         # angle to player 
         self.theta = 0 
 
