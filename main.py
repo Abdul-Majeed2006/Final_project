@@ -91,7 +91,7 @@ while running:
         #draw name being typed
         name_text_surface = font.render(player_name,True,(255,255,255))
         # draw title screen
-        title_text = title_font.render('My shooter game',True,(255,0,0))
+        title_text = title_font.render('Desert strike',True,(255,0,0))
         prompt_text = prompt_font.render('press Enter to start',True,(255,255,255))
         # make sure the text is i  center
         title_rect = title_text.get_rect(center=(WIDTH/2,(HEIGHT/2)-50))
