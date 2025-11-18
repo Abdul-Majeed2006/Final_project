@@ -35,7 +35,11 @@ class Weapon(pygame.sprite.Sprite):
         self.bullet_group = pygame.sprite.Group()
         #angle of rotation
         self.angle = 0
-       
+        # message to reload
+        self.reload_font = pygame.font.SysFont('Arial',30)
+        self.reload_timer = 0
+        self.reload_message_duration = 300 # 5 secs
+        self.reload_message_surface = None 
     def update(self):
         # well use cursor to aim 
         #get cursor x and y
@@ -72,12 +76,15 @@ class Weapon(pygame.sprite.Sprite):
             self.bullet_group.add(new_bullet)
         else:
             print('reload')
+            self.reload_timer = self.reload_message_duration
+            if not self.reload_message_surface:
+                self.reload_message_surface = self.reload_font.render('Reload',True,(255,0,0))
         
 
     def reload(self):
         #player calls function by clicking on a key
-        print('reloading')
         self.ammo = self.max_ammo
+        self.reload_timer = 0
 
     def draw(self,screen):
         screen.blit(self.image, self.rect)
@@ -85,3 +92,8 @@ class Weapon(pygame.sprite.Sprite):
         self.sight.draw(screen)
         # draw the bullet
         self.bullet_group.draw(screen)
+        # draw reload
+        if self.reload_timer > 0 and self.reload_message_surface:
+            message_rect = self.reload_message_surface.get_rect(
+                center=(self.player.rect.centerx,(self.player.rect.centery-50)))
+            screen.blit(self.reload_message_surface,message_rect)
