@@ -6,7 +6,9 @@ class Player(pygame.sprite.Sprite):
     def __init__(self,x = HEIGHT/2, y= WIDTH/2):
         pygame.sprite.Sprite.__init__(self)
         self.x_o = x
+        self.x = x
         self.y_o = y
+        self.y = y
         self.vx = 0
         self.vy = 0    
         # health
