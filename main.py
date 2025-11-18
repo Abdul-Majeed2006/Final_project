@@ -13,19 +13,24 @@ pygame.mouse.set_visible(False)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 running = True
+# game state title, playing, game over
+game_state = 'Title'
 # make background by calling the make background function
 background = make_background()
 # make a player weapon and enemy and sight
 player = Player()
 enemy_group = pygame.sprite.Group()
 # make 10
-for i in range(20):
+for i in range(10):
     x_pos = randint(0,WIDTH)
     y_pos = randint(0, HEIGHT)
     enemy_group.add(Enemy(x_pos,y_pos,player))
 # set up scoring
 score = 0
 font = pygame.font.SysFont('Arial',48)
+# fonts fro different screen
+title_font = pygame.font.SysFont('Arial',80)
+prompt_font = pygame.font.SysFont('Arial',30)
 ########### TESTING ZONE #################
 
 ##########################################
@@ -35,38 +40,86 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # event
-        player.check_event(event)
-    # update our player
-    player.update()
-    enemy_group.update()
-    # check collision between bullet and enemy group
-    collision = pygame.sprite.groupcollide(player.weapon.bullet_group,enemy_group,True,False)
-    #loop through all the bullets that hit the enemy
-    for bullet, enemies_hit in collision.items():
-        for enemy in enemies_hit:
-            #enemy takes damage
-            enemy.take_damage(bullet.damage)
-            score += 50
-    # check collision between enemy group an dplayer 
-    collision_2 = pygame.sprite.spritecollide(player,enemy_group,True)
-    # loop through all the enemy that hit player
-    for enemy in collision_2:
-        player.take_damage(enemy.damage)
+        # event based on the game state
+        if game_state == 'Title':
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:# enter key
+                    game_state = 'Playing'
+
+        elif game_state == 'Playing':
+            #event
+            player.check_event(event)
+        elif game_state == 'Gameover':
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r: #R to restart game
+                    #reset the game
+                    score = 0
+                    player.reset()
+                    enemy_group.empty()
+                    for i in range(10):
+                        x_pos = randint(0,WIDTH)
+                        y_pos = randint(0,HEIGHT)
+                        enemy_group.add(Enemy(x_pos,y_pos,player))
+                    #set the game to playing
+                    game_state = 'Playing'
     # draw background
     screen.blit(background,(0,0))
-    # RENDER YOUR GAME HERE((
-    player.draw(screen)
-    enemy_group.draw(screen)
-    # draw and update my score
-    # convert to string, only strings can be printed out
-    score_string = f'{score}'
-    score_surface = font.render(score_string, True, (255,0,0))
-    screen.blit(score_surface,(0,0))
-    # kill player when health = 0
-    if player.health <= 0:
-        player.kill()
-        running=False
+    #now update game based on the value of game state
+    if game_state == 'Title':
+        # draw title screen
+        title_text = title_font.render('My shooter game',True,(255,0,0))
+        prompt_text = prompt_font.render('press Enter to start',True,(255,255,255))
+        # make sure the text is i  center
+        title_rect = title_text.get_rect(center=(WIDTH/2,(HEIGHT/2)-50))
+        prompt_rect = prompt_text.get_rect(center=(WIDTH/2,(HEIGHT/2) +50))
+        screen.blit(title_text,title_rect)
+        screen.blit(prompt_text,prompt_rect)
+    elif game_state == 'Playing':
+        # update our player
+        player.update()
+        enemy_group.update()
+        # check collision between bullet and enemy group
+        collision = pygame.sprite.groupcollide(player.weapon.bullet_group,enemy_group,True,False)
+        #loop through all the bullets that hit the enemy
+        for bullet, enemies_hit in collision.items():
+            for enemy in enemies_hit:
+                #enemy takes damage
+                enemy.take_damage(bullet.damage)
+                score += 50
+        # check collision between enemy group an dplayer 
+        collision_2 = pygame.sprite.spritecollide(player,enemy_group,True)
+        # loop through all the enemy that hit player
+        for enemy in collision_2:
+            player.take_damage(enemy.damage)
+        # RENDER YOUR GAME HERE((
+        player.draw(screen)
+        enemy_group.draw(screen)
+        # draw and update my score
+        # convert to string, only strings can be printed out
+        score_string = f'{score}'
+        score_surface = font.render(score_string, True, (255,0,0))
+        screen.blit(score_surface,(0,0))
+        # kill player when health = 0 'Gameover'
+        if player.health <= 0:
+            player.kill()
+            game_state = 'Gameover'
+    elif game_state == 'Gameover':
+        # draw gamw over screen
+        player.draw(screen)
+        enemy_group.draw(screen)
+        #draw players score
+        score_string = f'{score}'
+        score_surface = font.render(score_string,True,(255,0,0))
+        screen.blit(score_surface,(0,0))
+        #draw gameover text
+        title_text = title_font.render('Game Over',True,(255,0,0))
+        prompt_text = prompt_font.render('Press R to Restart',True,(255,255,255))
+        #ceter texts
+        title_rect = title_text.get_rect(center=(WIDTH/2,(HEIGHT/2)-50))
+        prompt_rect = prompt_text.get_rect(center=(WIDTH/2,(HEIGHT/2)+50))
+        #draw
+        screen.blit(title_text,title_rect)
+        screen.blit(prompt_text,prompt_rect)
     # flip() the display to put your work on screen
     pygame.display.flip()
     clock.tick(60)  # limits FPS to 60

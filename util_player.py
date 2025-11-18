@@ -109,10 +109,10 @@ class Player(pygame.sprite.Sprite):
         
     def reset(self):
         self.health = self.max_health
-        self.image = self.image
+        self.image = self.image_right
         self.x = self.x_o
         self.y = self.y_o
-        self.rect = self.image.get_rect(self.x,self.y)
+        self.rect = self.image.get_rect(center=(self.x,self.y))
         self.vx = 0
         self.vy = 0
         self.weapon.reload()
