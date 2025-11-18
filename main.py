@@ -97,9 +97,17 @@ while running:
         title_rect = title_text.get_rect(center=(WIDTH/2,(HEIGHT/2)-50))
         prompt_rect = prompt_text.get_rect(center=(WIDTH/2,(HEIGHT/2) +50))
         name_rect = name_text_surface.get_rect(center=(WIDTH/2,HEIGHT/2))
+        #draw ono screen
         screen.blit(title_text,title_rect)
         screen.blit(prompt_text,prompt_rect)
         screen.blit(name_text_surface,name_rect)
+        # DRAW cursor
+        cursor = '' 
+        if pygame.time.get_ticks() % 1000 < 500:
+            cursor = '|'
+        cursor_surface = font.render(cursor,True,(255,255,255))
+        cursor_rect = cursor_surface.get_rect(midleft=name_rect.midright)
+        screen.blit(cursor_surface,cursor_rect)
         #draw high scores
         draw_high_scores(screen,high_scores)
     elif game_state == 'Playing':
