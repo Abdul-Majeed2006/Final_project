@@ -1,5 +1,9 @@
 [
     {
+        "name": "Mac",
+        "score": 4150
+    },
+    {
         "name": "zAKARI",
         "score": 2600
     },
@@ -12,11 +16,7 @@
         "score": 1750
     },
     {
-        "name": "Zakari",
-        "score": 400
-    },
-    {
-        "name": "Zakari",
-        "score": 0
+        "name": "ghufron",
+        "score": 500
     }
 ]
