@@ -40,6 +40,9 @@ class Weapon(pygame.sprite.Sprite):
         self.reload_timer = 0
         self.reload_message_duration = 300 # 5 secs
         self.reload_message_surface = None 
+        # load shoot sound
+        self.shoot_sound = pygame.mixer.Sound('assets/Audio/impactMetal_heavy_000.ogg')
+
     def update(self):
         # well use cursor to aim 
         #get cursor x and y
@@ -74,6 +77,8 @@ class Weapon(pygame.sprite.Sprite):
             damage = self.current_weapon['damage']
             new_bullet = Bullet(self.rect.centerx, self.rect.centery, self.angle,damage)
             self.bullet_group.add(new_bullet)
+            # play shoot sound
+            self.shoot_sound.play()
         else:
             print('reload')
             self.reload_timer = self.reload_message_duration

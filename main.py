@@ -13,6 +13,9 @@ pygame.init()
 pygame.mouse.set_visible(False)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
+# load sounds
+game_over_sound = pygame.mixer.Sound('assets/Audio/impactBell_heavy_000.ogg')
+
 running = True
 # game state title, playing, game over
 game_state = 'Title'
@@ -157,6 +160,7 @@ while running:
             #update high score list
             high_scores = save_high_scores(high_scores,player_name,score)
             player.kill()
+            game_over_sound.play()
             game_state = 'Gameover'
     elif game_state == 'Gameover':
         # draw gamw over screen
