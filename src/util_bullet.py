@@ -1,13 +1,16 @@
 import pygame
 import math
-from util_params import *
-#bullet image 
-bullet = pygame.image.load('assets/weapons/tile_0023.png')
+import os
+from .util_params import *
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, angle_rads,damage=5):
+    def __init__(self, x, y, angle_rads, damage=5):
         pygame.sprite.Sprite.__init__(self)
-        self.image = bullet
+        try:
+            self.image = pygame.image.load(os.path.join(WEAPONS_DIR, 'tile_0023.png'))
+        except:
+            self.image = pygame.Surface((4, 4))
+            self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y

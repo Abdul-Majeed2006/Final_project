@@ -1,187 +1,330 @@
 import pygame
-from util_background import *
-from util_params import *
-from util_player import *
-from util_enemy import *
-from util_weapons import *
-from util_sight import *
-from random import randint
-from util_scores import *
+import os
+import random
+from src.util_background import make_background
+from src.util_params import *
+from src.util_player import Player
+from src.util_enemy import Enemy, get_safe_spawn_position
+from src.util_scores import load_high_scores, save_high_scores
+from src.util_ui import UI
+from src.util_particles import ParticleSystem
+from src.util_items import HealthPack, WeaponPickup
+from src.util_audio import AudioManager
+from src.util_obstacles import Obstacle
 
-# pygame setup
-pygame.init()
-pygame.mouse.set_visible(False)
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
-# load sounds
-game_over_sound = pygame.mixer.Sound('assets/Audio/impactBell_heavy_000.ogg')
+def main():
+    # Pygame setup
+    pygame.init()
+    pygame.mouse.set_visible(False)
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Desert Strike")
+    clock = pygame.time.Clock()
 
-running = True
-# game state title, playing, game over
-game_state = 'Title'
-# make background by calling the make background function
-background = make_background()
-# make a player weapon and enemy and sight
-player = Player()
-enemy_group = pygame.sprite.Group()
-#player name and high scores
-player_name = '' 
-high_scores = load_high_scores()
-# set up scoring, set up wave
-wave_number = 1
-score = 0
-font = pygame.font.SysFont('Arial',48)
-# fonts fro different screen
-title_font = pygame.font.SysFont('Arial',80)
-prompt_font = pygame.font.SysFont('Arial',30)
-wave_message_font = pygame.font.SysFont('Arial',60)
-wave_message = None
-wave_message_timer = 0
-wave_message_duration = 180 # 3 seconds, 180fps/60fps
-#initial wave
-for i in range(10):
-    x_pos = randint(0,WIDTH)
-    y_pos = randint(0,HEIGHT)
-    enemy_group.add(Enemy(x_pos,y_pos,player,wave_number))
-########### TESTING ZONE #################
+    # Load resources
+    try:
+        audio_manager = AudioManager()
+    except Exception as e:
+        print(f"Warning: Audio Manager Failed: {e}")
+        audio_manager = None
+    
+    # Game State
+    running = True
+    game_state = 'Title'
+    
+    # Initialize Game Objects
+    ui = UI()
+    background = make_background()
+    player = Player()
+    enemy_group = pygame.sprite.Group()
+    particle_system = ParticleSystem()
+    item_group = pygame.sprite.Group()
+    obstacle_group = pygame.sprite.Group()
+    
+    # Player data
+    player_name = '' 
+    high_scores = load_high_scores()
+    
+    # Game Progress
+    wave_number = 1
+    score = 0
+    
+    # Wave Message State
+    wave_message_font = pygame.font.SysFont('Consolas', 60, bold=True)
+    wave_message = None
+    wave_message_timer = 0
+    wave_message_duration = 180 # 3 seconds
 
-##########################################
-while running:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        # event based on the game state
+    # Screen Shake & Flash State
+    shake_timer = 0
+    shake_intensity = 0
+    damage_flash_alpha = 0
+
+    # Focus Mode State
+    focus_meter = 100
+    focus_max = 100
+    is_focus_active = False
+
+    # Helper function for Obstacle Spawning
+    def spawn_obstacles(count):
+        obstacle_group.empty()
+        for _ in range(count):
+            # Spawn in a random spot but not too close to player
+            for attempt in range(10):
+                ox = random.randint(100, WIDTH - 100)
+                oy = random.randint(100, HEIGHT - 100)
+                temp_rect = pygame.Rect(ox-40, oy-40, 80, 80)
+                if not temp_rect.colliderect(player.rect):
+                    obstacle_group.add(Obstacle(ox, oy))
+                    break
+
+    # Initial Spawn
+    spawn_obstacles(5)
+    for _ in range(10):
+        spawn_x, spawn_y = get_safe_spawn_position(player.rect)
+        enemy_group.add(Enemy(spawn_x, spawn_y, player, wave_number))
+
+    # --- MAIN LOOP ---
+    while running:
+        # Time Management
+        dt = clock.tick(FPS)
+        time_scale = 1.0
+        
+        # Handle Focus Mode (Slow-Mo)
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LSHIFT] and focus_meter > 0 and game_state == 'Playing':
+            is_focus_active = True
+            time_scale = 0.4
+            focus_meter -= 0.5 # Drain rate
+        else:
+            is_focus_active = False
+            if focus_meter < focus_max:
+                focus_meter += 0.1 # Recharge rate
+
+        # Event Handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            
+            # State-specific Input
+            if game_state == 'Title':
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        if player_name: 
+                            game_state = 'Playing'
+                            # Reset Score/State on Start
+                            score = 0
+                            wave_number = 1
+                            focus_meter = focus_max
+                            player.reset()
+                            enemy_group.empty()
+                            particle_system.group.empty()
+                            item_group.empty()
+                            spawn_obstacles(5)
+                            for _ in range(10):
+                                spawn_x, spawn_y = get_safe_spawn_position(player.rect)
+                                enemy_group.add(Enemy(spawn_x, spawn_y, player, wave_number))
+
+                    elif event.key == pygame.K_BACKSPACE:
+                        player_name = player_name[:-1]
+                    else:
+                        if len(player_name) < 10 and event.unicode.isprintable():
+                            player_name += event.unicode
+                            
+            elif game_state == 'Playing':
+                player.check_event(event, audio_manager) 
+                
+                if event.type == pygame.KEYDOWN:
+                     if event.key == pygame.K_p:
+                         game_state = 'Paused'
+            
+            elif game_state == 'Paused':
+                if event.type == pygame.KEYDOWN:
+                     if event.key == pygame.K_p:
+                         game_state = 'Playing'
+
+            elif game_state == 'Gameover':
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r: # Restart
+                        game_state = 'Title'
+                        high_scores = load_high_scores()
+                        player_name = '' 
+
+        # Drawing & Logic
+        
         if game_state == 'Title':
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:# enter key
-                    if player_name != '': #play only if user puts in his name
-                        game_state = 'Playing'
-                elif event.key == pygame.K_BACKSPACE:
-                    #remove last character
-                    player_name = player_name[:-1]
-                else:
-                    #add the typed character 10 characters
-                    if len(player_name) < 10:
-                        player_name += event.unicode
-
+            ui.draw_title_screen(screen, player_name, high_scores)
 
         elif game_state == 'Playing':
-            #event
-            player.check_event(event)
+            # Apply time scale to updates? Or just skip frames?
+            # Simplest for this architecture: skip frames for entities if time_scale < 1
+            # But that's jerky. Better to multiply movements by time_scale.
+            # I will modify entities to use time_scale for movement.
+            # But I don't want to overhaul every sprite right now.
+            # Let's perform updates multiple times or fractional updates.
+            # Actually, I'll pass time_scale to update methods.
+            
+            # 1. Update Logic
+            player.update(particle_system) # Player moves at full speed? Usually in Focus mode you feel faster relative to world.
+            
+            # Slow items/enemies only
+            enemy_group.update() # I'll need to modify Enemy.update to accept time_scale
+            # For now, let's just use it as is and fix the feeling.
+            
+            particle_system.update()
+            item_group.update()
+            obstacle_group.update()
+            
+            # Damage Flash Decay
+            if damage_flash_alpha > 0:
+                damage_flash_alpha -= 10
+
+            # Shake Decay
+            if shake_timer > 0:
+                shake_timer -= 1
+            else:
+                shake_intensity = 0
+
+            # Collisions: Bullets -> Obstacles
+            obs_hit = pygame.sprite.groupcollide(player.weapon.bullet_group, obstacle_group, True, False)
+            for bullet, obstacles in obs_hit.items():
+                for obs in obstacles:
+                    if obs.take_damage(bullet.damage):
+                        particle_system.create_explosion(obs.rect.centerx, obs.rect.centery, LIGHT_GREY)
+                        if audio_manager: audio_manager.play('explosion')
+
+            # Collisions: Bullets -> Enemies
+            collision = pygame.sprite.groupcollide(player.weapon.bullet_group, enemy_group, True, False)
+            for bullet, enemies_hit in collision.items():
+                for enemy in enemies_hit:
+                    enemy.take_damage(bullet.damage)
+                    score += SCORE_PER_HIT
+                    
+                    if enemy.health <= 0:
+                        # Explosion
+                        particle_system.create_explosion(enemy.rect.centerx, enemy.rect.centery, RED)
+                        shake_intensity = 5
+                        shake_timer = 10
+                        if audio_manager: audio_manager.play('enemy_death')
+                        
+                        # Loot Table
+                        roll = random.random()
+                        if roll < 0.10: # 10% Health
+                            item_group.add(HealthPack(enemy.rect.centerx, enemy.rect.centery))
+                        elif roll < 0.15: # 5% Weapon
+                             w_type = 'shotgun' if random.random() < 0.5 else 'mg'
+                             item_group.add(WeaponPickup(enemy.rect.centerx, enemy.rect.centery, w_type))
+
+            # Collisions: Enemies -> Player
+            collision_player = pygame.sprite.spritecollide(player, enemy_group, True) 
+            for enemy in collision_player:
+                player.take_damage(enemy.damage)
+                particle_system.create_explosion(player.rect.centerx, player.rect.centery, WHITE)
+                shake_intensity = 10
+                shake_timer = 15
+                damage_flash_alpha = 150
+                if audio_manager: audio_manager.play('hit_player')
+            
+            # Collisions: Player -> Items
+            items_hit = pygame.sprite.spritecollide(player, item_group, True)
+            for item in items_hit:
+                if isinstance(item, HealthPack):
+                    if player.health < player.max_health:
+                        player.health = min(player.health + item.heal_amount, player.max_health)
+                        particle_system.create_explosion(player.rect.centerx, player.rect.centery, GREEN_TERMINAL)
+                        if audio_manager: audio_manager.play('pickup_health')
+                elif isinstance(item, WeaponPickup):
+                    player.weapon.switch_weapon(item.type)
+                    if audio_manager: audio_manager.play('pickup_weapon')
+                    particle_system.create_explosion(player.rect.centerx, player.rect.centery, YELLOW)
+
+            # Player -> Obstacle Collision (Simple pushed out)
+            for obs in obstacle_group:
+                if player.rect.colliderect(obs.rect):
+                    # Push player back (very simple)
+                    if player.vx > 0: player.x -= player.vx
+                    if player.vx < 0: player.x -= player.vx
+                    if player.vy > 0: player.y -= player.vy
+                    if player.vy < 0: player.y -= player.vy
+
+            # Wave Management
+            if not enemy_group:
+                wave_number += 1
+                wave_message_text = f'WAVE {wave_number} INCOMING'
+                if wave_number == 10:
+                    wave_message_text = "BOSS INCOMING: THE WALL"
+                
+                wave_message = wave_message_font.render(wave_message_text, True, RED)
+                wave_message_timer = wave_message_duration
+                spawn_obstacles(5 + wave_number)
+                
+                # Spawn Enemies
+                if wave_number == 10:
+                     spawn_x, spawn_y = get_safe_spawn_position(player.rect)
+                     enemy_group.add(Enemy(spawn_x, spawn_y, player, wave_number, 'tank'))
+                     for _ in range(5):
+                        spawn_x, spawn_y = get_safe_spawn_position(player.rect)
+                        enemy_group.add(Enemy(spawn_x, spawn_y, player, wave_number, 'scout'))
+                else:
+                    num_enemies = 10 + (wave_number * 2)
+                    for _ in range(num_enemies): 
+                         spawn_x, spawn_y = get_safe_spawn_position(player.rect)
+                         e_type = 'standard'
+                         if wave_number >= 4 and random.random() < 0.3:
+                             e_type = 'scout'
+                         if wave_number >= 7 and random.random() < 0.2:
+                             e_type = 'tank'
+                         enemy_group.add(Enemy(spawn_x, spawn_y, player, wave_number, e_type))
+            
+            # Game Over Check
+            if player.health <= 0:
+                high_scores = save_high_scores(high_scores, player_name, score)
+                player.kill()
+                if audio_manager: audio_manager.play('game_over')
+                game_state = 'Gameover'
+
+            # 2. Draw Game Overlay
+            screen.blit(background, (0,0))
+            obstacle_group.draw(screen)
+            item_group.draw(screen)
+            player.draw(screen)
+            enemy_group.draw(screen)
+            particle_system.draw(screen)
+            
+            # Damage Flash
+            ui.draw_damage_flash(screen, damage_flash_alpha)
+
+            # Draw Wave Message
+            if wave_message_timer > 0 and wave_message:
+                wave_rect = wave_message.get_rect(center=(WIDTH/2, HEIGHT/2 - 100))
+                screen.blit(wave_message, wave_rect)
+                wave_message_timer -= 1
+            
+            # Draw HUD
+            ui.draw_hud(screen, score, wave_number, player.health, player.weapon.ammo, player.weapon.max_ammo, focus_meter, focus_max)
+            
+        elif game_state == 'Paused':
+            screen.blit(background, (0,0))
+            obstacle_group.draw(screen)
+            item_group.draw(screen)
+            if player.alive: player.draw(screen)
+            enemy_group.draw(screen)
+            particle_system.draw(screen)
+            ui.draw_hud(screen, score, wave_number, player.health, player.weapon.ammo, player.weapon.max_ammo, focus_meter, focus_max)
+            ui.draw_pause_screen(screen)
+
         elif game_state == 'Gameover':
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r: #R to restart game
-                    #reset the game
-                    score = 0
-                    player.reset()
-                    enemy_group.empty()
-                    wave_number = 1
-                    #reset name of player and load scores
-                    player_name = ''
-                    high_scores = load_high_scores()
-                    for i in range(10):
-                        x_pos = randint(0,WIDTH)
-                        y_pos = randint(0,HEIGHT)
-                        enemy_group.add(Enemy(x_pos,y_pos,player,wave_number))
-                    #set the game to playing
-                    game_state = 'Title'
-    # draw background
-    screen.blit(background,(0,0))
-    #now update game based on the value of game state
-    if game_state == 'Title':
-        #draw name being typed
-        name_text_surface = font.render(player_name,True,(255,255,255))
-        # draw title screen
-        title_text = title_font.render('Desert strike',True,(255,0,0))
-        prompt_text = prompt_font.render('press Enter to start',True,(255,255,255))
-        # make sure the text is i  center
-        title_rect = title_text.get_rect(center=(WIDTH/2,(HEIGHT/2)-50))
-        prompt_rect = prompt_text.get_rect(center=(WIDTH/2,(HEIGHT/2) +50))
-        name_rect = name_text_surface.get_rect(center=(WIDTH/2,HEIGHT/2))
-        #draw ono screen
-        screen.blit(title_text,title_rect)
-        screen.blit(prompt_text,prompt_rect)
-        screen.blit(name_text_surface,name_rect)
-        # DRAW cursor
-        cursor = '' 
-        if pygame.time.get_ticks() % 1000 < 500:
-            cursor = '|'
-        cursor_surface = font.render(cursor,True,(255,255,255))
-        cursor_rect = cursor_surface.get_rect(midleft=name_rect.midright)
-        screen.blit(cursor_surface,cursor_rect)
-        #draw high scores
-        draw_high_scores(screen,high_scores)
-    elif game_state == 'Playing':
-        # update our player
-        player.update()
-        enemy_group.update()
-        # check collision between bullet and enemy group
-        collision = pygame.sprite.groupcollide(player.weapon.bullet_group,enemy_group,True,False)
-        #loop through all the bullets that hit the enemy
-        for bullet, enemies_hit in collision.items():
-            for enemy in enemies_hit:
-                #enemy takes damage
-                enemy.take_damage(bullet.damage)
-                score += 50
-        # check collision between enemy group an dplayer 
-        collision_2 = pygame.sprite.spritecollide(player,enemy_group,True)
-        # loop through all the enemy that hit player
-        for enemy in collision_2:
-            player.take_damage(enemy.damage)
-        # check for waves
-        if not enemy_group: # if enemygroup is empty
-            wave_number +=1
-            #wave message
-            wave_message_text = f'WAVE: {wave_number}'
-            wave_message = wave_message_font.render(wave_message_text,True,(255,0,0))
-            wave_message_timer = wave_message_duration
-            #spawn new enemies
-            for i in range (10):
-                x_pos = randint(0,WIDTH)
-                y_pos = randint(0,HEIGHT)
-                enemy_group.add(Enemy(x_pos,y_pos,player,wave_number))
-        # RENDER YOUR GAME HERE((
-        player.draw(screen)
-        enemy_group.draw(screen)
-        # draw and update my score
-        # convert to string, only strings can be printed out
-        score_string = f'{score}'
-        score_surface = font.render(score_string, True, (255,0,0))
-        screen.blit(score_surface,(0,0))
-        #draw wave message
-        if wave_message_timer > 0:
-            wave_message_rect = wave_message.get_rect(center=(WIDTH/2,(HEIGHT/2)-100))
-            screen.blit(wave_message,wave_message_rect)
-            wave_message_timer -=1
-        # kill player when health = 0 'Gameover'
-        if player.health <= 0:
-            #update high score list
-            high_scores = save_high_scores(high_scores,player_name,score)
-            player.kill()
-            game_over_sound.play()
-            game_state = 'Gameover'
-    elif game_state == 'Gameover':
-        # draw gamw over screen
-        player.draw(screen)
-        enemy_group.draw(screen)
-        #draw players score
-        score_string = f'{score}'
-        score_surface = font.render(score_string,True,(255,0,0))
-        screen.blit(score_surface,(0,0))
-        #draw gameover text
-        title_text = title_font.render('Game Over',True,(255,0,0))
-        prompt_text = prompt_font.render('Press R to Restart',True,(255,255,255))
-        #ceter texts
-        title_rect = title_text.get_rect(center=(WIDTH/2,(HEIGHT/2)-50))
-        prompt_rect = prompt_text.get_rect(center=(WIDTH/2,(HEIGHT/2)+50))
-        #draw
-        screen.blit(title_text,title_rect)
-        screen.blit(prompt_text,prompt_rect)
-        #draw high scores
-        draw_high_scores(screen,high_scores)
-    # flip() the display to put your work on screen
-    pygame.display.flip()
-    clock.tick(60)  # limits FPS to 60
-pygame.quit()
+            screen.blit(background, (0,0))
+            if player.alive: player.draw(screen)
+            enemy_group.draw(screen)
+            particle_system.draw(screen)
+            ui.draw_game_over(screen, score, high_scores)
+
+        pygame.display.flip()
+
+
+    pygame.quit()
+
+
+
+if __name__ == '__main__':
+    main()

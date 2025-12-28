@@ -1,5 +1,5 @@
 import pygame
-from util_weapons import *
+
 class Sight(pygame.sprite.Sprite):
     def __init__(self, sight):
         pygame.sprite.Sprite.__init__(self) 

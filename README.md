@@ -1,33 +1,64 @@
-Desert Strike: A Top-Down Arena Shooter
-![alt text](background.png)
-Description:
-Desert Strike is a fast-paced, top-down arena shooter built in Pygame. Players must survive against endless waves of enemies that get progressively faster and more difficult. Enter your name, aim for the high score, and see how long you can last!
+# Desert Strike
 
-Features:
-Endless Wave System: Enemies get faster and more numerous with each new wave.
-Persistent High Scores: The game saves the Top 5 scores in a high_scores.json file, so you can compete for the top spot.
-Player Name Entry: Enter your name on the title screen to be immortalized on the high score list.
-Full Game Loop: A complete game with a Title Screen, a 'Playing' state, and a Game Over screen.
-Smooth Controls: Classic WASD/Arrow key movement and intuitive mouse-based aiming.
+![Banner](images/background.png)
 
-How to Play:
-1. Run the Game:
-You will need pygame installed to run the game.
-Then, run the main file:
+## Description
+
+**Desert Strike** is a fast-paced, top-down arena shooter built with Pygame. Players must survive against endless waves of enemies that increase in speed and difficulty. Test your reflexes, aim for the high score, and see how long you can survive the onslaught!
+
+## Features
+
+- **Endless Waves**: Enemies become faster and more aggressive as you progress.
+- **Weapon System**: Shotguns and Machine Guns with unique firing mechanics.
+- **Extreme Vibe**: Focus Mode (Bullet Time) and Dash abilities.
+- **Audio Overhaul**: Full sound effects for every action.
+- **Persistent High Scores**: Local leaderboard tracks the top 5 players.
+
+## Installation
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone <repository_url>
+   cd Final_project
+   ```
+
+2. **Install Dependencies**:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## How to Play
+
+Run the game using Python:
+
+```bash
 python main.py
+```
 
-2. Controls:
-Move: W, A, S, D or Arrow Keys
-Aim: Mouse
-Shoot: Left Mouse Click
-Reload: R Key
-Start Game: Type your name and press Enter
-Restart Game: Press R from the "Game Over" screen
+### Controls
 
-Screenshots:
-Title Screen (with High Scores)
-![alt text](<main_game_interface.png>)
-Gameplay in Action
-![alt text](game_running.png)
-Game Over Screen
-![alt text](<game_over.png>)
+| Action | Key |
+| :--- | :--- |
+| **Move** | `W`, `A`, `S`, `D` or Arrow Keys |
+| **Aim** | Mouse Cursor |
+| **Shoot** | Left Mouse Button |
+| **Dash** | `Space` |
+| **Focus Mode** | `Left Shift` |
+| **Reload** | `R` |
+| **Pause** | `P` |
+
+## Screenshots
+
+### Title Screen
+
+![Title Screen](images/main_game_interface.png)
+
+### Gameplay
+
+![Gameplay](images/game_running.png)
+
+### Game Over
+
+![Game Over](images/game_over.png)
